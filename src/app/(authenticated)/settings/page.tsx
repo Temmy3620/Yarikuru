@@ -14,7 +14,9 @@ export default async function SettingsPage() {
 	const supabase = await createClient();
 	const { data: dbUser } = await supabase
 		.from("users")
-		.select("subscription_status, trial_ends_at, is_admin")
+		.select(
+			"subscription_status, trial_ends_at, is_admin, stripe_subscription_id",
+		)
 		.eq("id", user.id)
 		.maybeSingle();
 
@@ -23,6 +25,7 @@ export default async function SettingsPage() {
 			subscriptionStatus={dbUser?.subscription_status ?? "free"}
 			trialEndsAt={dbUser?.trial_ends_at ?? null}
 			isAdmin={dbUser?.is_admin ?? false}
+			stripeSubscriptionId={dbUser?.stripe_subscription_id ?? null}
 		/>
 	);
 }
