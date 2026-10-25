@@ -31,11 +31,17 @@ export function TrialBanner({ isTrialing, remainingDays }: TrialBannerProps) {
 				},
 			});
 			const data = await res.json();
-			if (data.url) {
-				window.location.href = data.url;
+			if (!res.ok || !data.url) {
+				throw new Error(data.error || "決済画面の生成に失敗しました。");
 			}
+			window.location.href = data.url;
 		} catch (err) {
 			console.error("Failed to redirect to checkout:", err);
+			alert(
+				err instanceof Error
+					? err.message
+					: "決済画面への接続に失敗しました。時間をおいて再試行してください。",
+			);
 			setIsLoading(false);
 		}
 	};

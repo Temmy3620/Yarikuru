@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
+import { calculateRemainingTrialDays } from "@/lib/subscription";
 import { getCurrentUser } from "@/lib/supabase/dal";
 import { createClient } from "@/lib/supabase/server";
-import { calculateRemainingTrialDays } from "@/lib/subscription";
+import { getBaseUrl } from "@/lib/url";
 
 export async function POST(req: Request) {
 	try {
@@ -18,7 +19,10 @@ export async function POST(req: Request) {
 		if (!process.env.STRIPE_PRICE_ID) {
 			console.error("STRIPE_PRICE_ID is not configured in env");
 			return NextResponse.json(
-				{ error: "Stripe Price ID が設定されていません。" },
+				{
+					error:
+						"Stripe Price ID が設定されていません。Vercel等の環境変数をご確認ください。",
+				},
 				{ status: 500 },
 			);
 		}
@@ -34,6 +38,9 @@ export async function POST(req: Request) {
 		const remainingTrialDays = calculateRemainingTrialDays(
 			dbUser?.trial_ends_at,
 		);
+
+		// Vercel本番・ローカル両方で正しいURLを動的に生成
+		const baseUrl = await getBaseUrl(req);
 
 		// Stripe Checkout Sessionの作成
 		const session = await stripe.checkout.sessions.create({
@@ -53,10 +60,9 @@ export async function POST(req: Request) {
 						},
 					}
 				: {}),
-			success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?checkout_success=true&session_id={CHECKOUT_SESSION_ID}`,
-			cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+			success_url: `${baseUrl}/dashboard?checkout_success=true&session_id={CHECKOUT_SESSION_ID}`,
+			cancel_url: `${baseUrl}/dashboard`,
 		});
-
 
 		if (!session.url) {
 			throw new Error("Stripe CheckoutセッションURLの生成に失敗しました。");
