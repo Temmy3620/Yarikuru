@@ -6,6 +6,10 @@ export interface User {
 	name: string;
 	email: string;
 	createdAt: string;
+	subscriptionStatus?: string | null;
+	trialEndsAt?: string | null;
+	isAdmin?: boolean;
+	stripeSubscriptionId?: string | null;
 }
 
 // Supabase からユーザー一覧を取得
@@ -25,6 +29,10 @@ export async function getUsers(): Promise<User[]> {
 		name: user.name,
 		email: user.email,
 		createdAt: user.created_at,
+		subscriptionStatus: user.subscription_status ?? null,
+		trialEndsAt: user.trial_ends_at ?? null,
+		isAdmin: user.is_admin ?? false,
+		stripeSubscriptionId: user.stripe_subscription_id ?? null,
 	}));
 }
 
@@ -53,5 +61,9 @@ export async function getUserById(
 		name: data.name ?? "新規ユーザー",
 		email: data.email,
 		createdAt: data.created_at,
+		subscriptionStatus: data.subscription_status ?? null,
+		trialEndsAt: data.trial_ends_at ?? null,
+		isAdmin: data.is_admin ?? false,
+		stripeSubscriptionId: data.stripe_subscription_id ?? null,
 	};
 }

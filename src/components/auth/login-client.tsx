@@ -10,6 +10,7 @@ import { LoginForm } from "@/components/auth/login-form";
 import { SignupForm } from "@/components/auth/signup-form";
 import Footer from "@/components/navigation/footer";
 import { AnimatePresence, motion } from "motion/react";
+import { getFreeTrialDays } from "@/lib/subscription";
 
 interface LoginClientProps {
 	loginAction: (
@@ -97,13 +98,16 @@ export default function LoginClient({
 							<button
 								type="button"
 								onClick={() => setMode("signup")}
-								className={`flex-1 pb-4 border-b-2 tracking-wider font-semibold transition-colors duration-200 cursor-pointer ${
+								className={`flex-1 pb-4 border-b-2 tracking-wider font-semibold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
 									!isLogin
 										? "border-violet-500 text-white"
 										: "border-transparent text-slate-500 hover:text-slate-300"
 								}`}
 							>
-								会員登録
+								<span>会員登録</span>
+								<span className="text-[10px] bg-violet-500/20 text-violet-300 px-1.5 py-0.5 rounded-full border border-violet-500/30">
+									{getFreeTrialDays()}日無料
+								</span>
 							</button>
 						</div>
 

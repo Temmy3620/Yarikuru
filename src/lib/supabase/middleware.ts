@@ -55,7 +55,6 @@ export async function updateSession(request: NextRequest) {
 		"/api/stripe/webhook",
 	);
 	const isOnboardingPage = request.nextUrl.pathname.startsWith("/onboarding");
-	const isSubscribePage = request.nextUrl.pathname.startsWith("/subscribe");
 	const isPublicInfoPage =
 		request.nextUrl.pathname.startsWith("/terms") ||
 		request.nextUrl.pathname.startsWith("/privacy") ||
@@ -92,7 +91,9 @@ export async function updateSession(request: NextRequest) {
 		// データベース(public.users)から最新のサブスクステータスおよび管理者ステータスを直接取得（クッキーのキャッシュタイムラグを防ぐため）
 		const { data: dbUser } = await supabase
 			.from("users")
-			.select("subscription_status, is_admin")
+			.select(
+				"subscription_status, is_admin, trial_ends_at, stripe_subscription_id",
+			)
 			.eq("id", user.id)
 			.maybeSingle();
 
@@ -120,30 +121,26 @@ export async function updateSession(request: NextRequest) {
 						email: user.email,
 						name: user.user_metadata?.name ?? "管理者",
 						is_admin: true,
+						subscription_status: "active",
+						trial_ends_at: null,
 					});
 				}
 			}
 		}
 
-		const subscriptionStatus = dbUser?.subscription_status || "free";
-		const hasActiveSub =
-			isAdmin ||
-			subscriptionStatus === "trialing" ||
-			subscriptionStatus === "active";
 		const isOnboarded = user.user_metadata?.onboarded === true;
 
-		// ログイン済みユーザーがログイン画面にアクセスした場合、すべて完了しているならダッシュボードへ
-		if (isLoginPage && hasActiveSub && isOnboarded) {
+		// ログイン済みユーザーがログイン画面にアクセスした場合、ダッシュボードへ転送（期限切れの場合はダッシュボード上でモーダルが表示される）
+		if (isLoginPage && isOnboarded) {
 			const url = request.nextUrl.clone();
 			url.pathname = "/dashboard";
 			return NextResponse.redirect(url);
 		}
 
-		// 1. サブスクリプション状態に応じたリダイレクト制御
-		if (!hasActiveSub) {
-			// 未購読で、購読案内画面以外かつその他の公開ページやAPI以外にアクセスした場合
+		// オンボーディング状況に応じたリダイレクト制御
+		if (!isOnboarded) {
 			if (
-				!isSubscribePage &&
+				!isOnboardingPage &&
 				!isLoginPage &&
 				!isRootPage &&
 				!isForgotPasswordPage &&
@@ -153,41 +150,15 @@ export async function updateSession(request: NextRequest) {
 				!isPublicInfoPage
 			) {
 				const url = request.nextUrl.clone();
-				url.pathname = "/subscribe";
+				url.pathname = "/onboarding";
 				return NextResponse.redirect(url);
 			}
 		} else {
-			// 購読済みだが /subscribe 画面にアクセスした場合、/dashboard または /onboarding へ転送
-			if (isSubscribePage) {
+			// オンボーディング完了済みなのにオンボーディング画面にアクセスした場合
+			if (isOnboardingPage) {
 				const url = request.nextUrl.clone();
-				url.pathname = isOnboarded ? "/dashboard" : "/onboarding";
+				url.pathname = "/dashboard";
 				return NextResponse.redirect(url);
-			}
-
-			// 2. オンボーディング状況に応じたリダイレクト制御 (購読済みの場合のみ有効)
-			if (!isOnboarded) {
-				// 未オンボーディングで、オンボーディング画面以外かつその他の公開ページやAPI以外にアクセスした場合
-				if (
-					!isOnboardingPage &&
-					!isLoginPage &&
-					!isRootPage &&
-					!isForgotPasswordPage &&
-					!isResetPasswordPage &&
-					!isApi &&
-					!isAuthApi &&
-					!isPublicInfoPage
-				) {
-					const url = request.nextUrl.clone();
-					url.pathname = "/onboarding";
-					return NextResponse.redirect(url);
-				}
-			} else {
-				// オンボーディング完了済みなのにオンボーディング画面にアクセスした場合
-				if (isOnboardingPage) {
-					const url = request.nextUrl.clone();
-					url.pathname = "/dashboard";
-					return NextResponse.redirect(url);
-				}
 			}
 		}
 	}

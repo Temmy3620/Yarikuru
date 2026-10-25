@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { getCurrentUser } from "@/lib/supabase/dal";
+import { createClient } from "@/lib/supabase/server";
+import { calculateRemainingTrialDays } from "@/lib/subscription";
 
 export async function POST(req: Request) {
 	try {
@@ -21,6 +23,18 @@ export async function POST(req: Request) {
 			);
 		}
 
+		const supabase = await createClient();
+		const { data: dbUser } = await supabase
+			.from("users")
+			.select("trial_ends_at")
+			.eq("id", user.id)
+			.maybeSingle();
+
+		// 事前登録時に残り無料日数があればStripe側トライアル日数として引き継ぐ（期限切れ時は即時課金）
+		const remainingTrialDays = calculateRemainingTrialDays(
+			dbUser?.trial_ends_at,
+		);
+
 		// Stripe Checkout Sessionの作成
 		const session = await stripe.checkout.sessions.create({
 			mode: "subscription",
@@ -32,12 +46,17 @@ export async function POST(req: Request) {
 					quantity: 1,
 				},
 			],
-			subscription_data: {
-				trial_period_days: 90, // 90日間無料トライアルを設定
-			},
-			success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-			cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscribe`, // 購読案内ページに戻す
+			...(remainingTrialDays > 0
+				? {
+						subscription_data: {
+							trial_period_days: remainingTrialDays,
+						},
+					}
+				: {}),
+			success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?checkout_success=true&session_id={CHECKOUT_SESSION_ID}`,
+			cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
 		});
+
 
 		if (!session.url) {
 			throw new Error("Stripe CheckoutセッションURLの生成に失敗しました。");

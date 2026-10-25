@@ -98,7 +98,7 @@ export function BillingSettingsSection({
 					) : isTrialing ? (
 						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shadow-sm shadow-emerald-950/40">
 							<Sparkles className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-							90日間無料トライアル中
+							無料体験中
 						</span>
 					) : isActive ? (
 						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shadow-sm">
@@ -165,7 +165,7 @@ export function BillingSettingsSection({
 						<span>現在有料プランには加入していません。</span>
 					</div>
 					<p className="text-xs text-slate-400">
-						90日間の無料トライアルに登録すると、すべての機能をご利用いただけます。
+						無料体験期間が終了しています。クレジットカードをご登録いただくと、すべての機能をご利用いただけます。
 					</p>
 					<div>
 						<Link
@@ -173,7 +173,7 @@ export function BillingSettingsSection({
 							className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-violet-600/20"
 						>
 							<Sparkles className="w-3.5 h-3.5" />
-							<span>90日間無料トライアルを始める</span>
+							<span>クレジットカードを登録する</span>
 						</Link>
 					</div>
 				</div>

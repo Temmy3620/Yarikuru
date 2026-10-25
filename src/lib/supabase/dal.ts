@@ -1,7 +1,8 @@
 import "server-only";
-import { cache } from "react";
-import { createClient } from "./server";
 import { redirect } from "next/navigation";
+import { cache } from "react";
+import { calculateTrialEndsAt } from "@/lib/subscription";
+import { createClient } from "./server";
 
 /**
  * セッションを検証し、認証されていない場合はログイン画面へリダイレクトします。
@@ -63,6 +64,11 @@ export const getCurrentUser = cache(async () => {
 				email: user.email ?? "",
 				name: user.user_metadata?.name ?? "新規ユーザー",
 				is_admin: isAdminInTable,
+				subscription_status: isAdminInTable ? "active" : "trialing",
+				trial_started_at: isAdminInTable ? null : new Date().toISOString(),
+				trial_ends_at: isAdminInTable
+					? null
+					: calculateTrialEndsAt().toISOString(),
 			});
 			if (insertError) {
 				console.error("JIT Sync insert error detail:", insertError);

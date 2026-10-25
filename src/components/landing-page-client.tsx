@@ -18,6 +18,7 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import Footer from "./navigation/footer";
+import { getFreeTrialDays } from "@/lib/subscription";
 
 // イージング定義 (Sleek out-expo)
 const easeOutExpo = [0.16, 1, 0.3, 1] as const;
@@ -74,6 +75,8 @@ const fadeInScrollVariants = {
 };
 
 export default function LandingPageClient() {
+	const trialDays = getFreeTrialDays();
+
 	return (
 		<div className="min-h-screen bg-[#030616] text-[#e2e8f0] relative overflow-hidden font-sans select-none">
 			{/* 背景: 方眼グリッド */}
@@ -176,7 +179,7 @@ export default function LandingPageClient() {
 									className="flex items-center justify-center gap-2.5 rounded-xl border border-slate-700 bg-slate-900/60 backdrop-blur-md px-8 py-4 text-base font-semibold text-slate-300 hover:text-white hover:border-slate-500 hover:bg-slate-800/80 transition-all duration-200 cursor-pointer"
 								>
 									<Mail className="h-4.5 w-4.5" />
-									メールアドレスで90日間無料体験
+									メールアドレスで{trialDays}日間無料体験（クレカ不要）
 								</Link>
 							</motion.div>
 						</motion.div>
@@ -807,14 +810,14 @@ export default function LandingPageClient() {
 											¥150
 										</span>
 										<span className="ml-1 text-sm font-semibold text-slate-500">
-											/ 月額 (初回90日間無料)
+											/ 月額 (初回{trialDays}日間無料)
 										</span>
 									</div>
 
 									<ul className="space-y-4 border-t border-white/5 pt-6 text-sm text-slate-300">
 										<li className="flex items-center gap-3 font-semibold text-violet-400">
 											<span className="text-violet-400 font-bold">✓</span>
-											初回90日間無料トライアル
+											初回{trialDays}日間無料体験（クレジットカード不要）
 										</li>
 										<li className="flex items-center gap-3">
 											<span className="text-violet-400 font-bold">✓</span>
@@ -842,7 +845,7 @@ export default function LandingPageClient() {
 										href="/login?mode=signup"
 										className="flex w-full justify-center rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:from-violet-500 hover:to-indigo-500 transition-all duration-200 text-center cursor-pointer"
 									>
-										90日間無料で試してみる
+										{trialDays}日間無料で試してみる
 									</Link>
 								</div>
 							</motion.div>
@@ -891,7 +894,7 @@ export default function LandingPageClient() {
 									href="/login?mode=signup"
 									className="inline-flex items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#00d2ff] to-[#0066ff] px-10 py-5 text-lg font-bold text-white shadow-[0_0_30px_rgba(0,210,255,0.4)] hover:from-[#00e1ff] hover:to-[#0077ff] transition-all duration-300 cursor-pointer"
 								>
-									90日間無料で試してみる
+									{trialDays}日間無料で試してみる
 									<ChevronRight className="h-5 w-5" />
 								</Link>
 							</motion.div>
