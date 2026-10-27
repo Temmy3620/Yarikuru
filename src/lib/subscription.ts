@@ -79,16 +79,24 @@ export function evaluateSubscription(user: {
 	const now = new Date();
 	const trialEndsAt = user.trial_ends_at ? new Date(user.trial_ends_at) : null;
 	const rawStatus = user.subscription_status || "free";
+	const isCanceled = rawStatus === "canceled" || rawStatus === "unpaid";
 	const isPaidActive = rawStatus === "active";
-	const hasStripeSub = Boolean(user.stripe_subscription_id);
+	// 有効なStripe契約（解約されていない）
+	const hasActiveStripeSub =
+		Boolean(user.stripe_subscription_id) && !isCanceled;
 
-	// Stripe有料契約がなく、trial_ends_atが未来の場合 -> 無料体験中 (trialing)
+	// Stripe有料契約がなく、解約済みでもなく、trial_ends_atが未来の場合 -> 無料体験中 (trialing)
 	const isTrialing =
-		!isPaidActive && !hasStripeSub && Boolean(trialEndsAt && trialEndsAt > now);
+		!isPaidActive &&
+		!hasActiveStripeSub &&
+		!isCanceled &&
+		Boolean(trialEndsAt && trialEndsAt > now);
 
-	// Stripe有料契約がなく、trial_ends_atが過去または未設定 -> 無料期限切れ (trial_expired)
+	// Stripe有効契約がなく、かつ（解約済み、または無料期限切れ） -> 機能ロック (trial_expired)
 	const isTrialExpired =
-		!isPaidActive && !hasStripeSub && (!trialEndsAt || trialEndsAt <= now);
+		!isPaidActive &&
+		!hasActiveStripeSub &&
+		(isCanceled || !trialEndsAt || trialEndsAt <= now);
 
 	// 有効な利用権限があるか（管理者、有料契約中、または無料体験中）
 	const hasActiveSubscription = isPaidActive || isTrialing;
