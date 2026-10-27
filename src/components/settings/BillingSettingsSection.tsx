@@ -1,27 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import {
+	AlertCircle,
+	CheckCircle2,
+	Clock,
 	CreditCard,
 	ExternalLink,
 	Loader2,
 	Sparkles,
-	Clock,
-	CheckCircle2,
-	AlertCircle,
 } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 interface BillingSettingsSectionProps {
 	subscriptionStatus: string;
 	trialEndsAt: string | null;
 	isAdmin?: boolean;
+	stripeSubscriptionId?: string | null;
 }
 
 export function BillingSettingsSection({
 	subscriptionStatus,
 	trialEndsAt,
 	isAdmin = false,
+	stripeSubscriptionId = null,
 }: BillingSettingsSectionProps) {
 	const [isPortalLoading, setIsPortalLoading] = useState(false);
 	const [portalError, setPortalError] = useState<string | null>(null);
@@ -66,9 +68,15 @@ export function BillingSettingsSection({
 		daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 	}
 
-	const isTrialing = subscriptionStatus === "trialing";
-	const isActive = subscriptionStatus === "active";
-	const isSubscribed = isTrialing || isActive;
+	// クレジットカード登録完了済み（有料アクティブ、または無料期間中にStripeサブスク作成済み）
+	const hasSubscribed =
+		Boolean(stripeSubscriptionId) || subscriptionStatus === "active";
+	// トライアル中かつクレカ登録済み
+	const isTrialingWithCard =
+		Boolean(stripeSubscriptionId) && subscriptionStatus === "trialing";
+	// クレカ未登録の無料体験中
+	const isUnsubscribedTrialing =
+		!hasSubscribed && subscriptionStatus === "trialing";
 
 	return (
 		<div className="rounded-2xl border border-white/5 bg-[#0a0f24]/40 p-6 md:p-8 backdrop-blur-md shadow-xl space-y-5">
@@ -95,15 +103,20 @@ export function BillingSettingsSection({
 							<Sparkles className="w-3.5 h-3.5 text-purple-400" />
 							管理者アカウント
 						</span>
-					) : isTrialing ? (
-						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shadow-sm shadow-emerald-950/40">
-							<Sparkles className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-							90日間無料トライアル中
+					) : isTrialingWithCard ? (
+						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 shadow-sm shadow-indigo-950/40">
+							<CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+							カード登録済み（無料体験中）
 						</span>
-					) : isActive ? (
+					) : hasSubscribed ? (
 						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shadow-sm">
 							<CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
 							月額プラン利用中
+						</span>
+					) : isUnsubscribedTrialing ? (
+						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shadow-sm shadow-emerald-950/40">
+							<Sparkles className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+							無料体験中
 						</span>
 					) : (
 						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-500/10 border border-white/10 text-slate-400">
@@ -125,8 +138,8 @@ export function BillingSettingsSection({
 				</div>
 			)}
 
-			{/* トライアル中ハイライトボックス */}
-			{!isAdmin && isTrialing && (
+			{/* クレカ未登録の無料体験中ハイライトボックス */}
+			{!isAdmin && isUnsubscribedTrialing && (
 				<div className="p-4 rounded-xl bg-gradient-to-r from-emerald-950/30 via-teal-950/20 to-indigo-950/30 border border-emerald-500/20 space-y-2">
 					<div className="flex items-center justify-between flex-wrap gap-2">
 						<div className="flex items-center gap-2 text-xs font-medium text-emerald-300">
@@ -145,27 +158,81 @@ export function BillingSettingsSection({
 						)}
 					</div>
 					<p className="text-xs text-slate-400 leading-relaxed pt-1">
-						無料トライアル期間中は一切料金が発生しません。期間終了日以降に自動的に月額課金が開始されます。カードの変更や解約はいつでもポータルより行えます。
+						無料体験期間中は一切料金が発生しません。期間終了後はクレジットカードのご登録が必要となります。無料期間中でも事前にカードをご登録いただけます（残り日数が引き継がれます）。
 					</p>
+					<div className="pt-2">
+						<Link
+							href="/subscribe"
+							className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-900/30"
+						>
+							<CreditCard className="w-3.5 h-3.5" />
+							<span>クレジットカードを事前登録する</span>
+						</Link>
+					</div>
 				</div>
 			)}
 
-			{/* 通常のアクティブプランの場合 */}
-			{!isAdmin && isActive && (
-				<div className="p-4 rounded-xl bg-indigo-950/20 border border-indigo-500/20 text-xs text-slate-300 leading-relaxed">
-					プレミアム月額プランが有効です。すべての機能をご利用いただけます。次回の請求日や請求書履歴の確認、カード情報の変更はStripeカスタマーポータルより行えます。
+			{/* 有料契約中、またはクレジットカード事前登録済みの場合 */}
+			{!isAdmin && hasSubscribed && (
+				<div className="space-y-4">
+					<div className="p-4 rounded-xl bg-indigo-950/20 border border-indigo-500/20 text-xs text-slate-300 leading-relaxed">
+						{isTrialingWithCard ? (
+							<>
+								クレジットカードの事前登録が完了しています。無料体験期間（
+								{daysRemaining !== null && (
+									<strong className="text-emerald-300">
+										残り {daysRemaining} 日
+									</strong>
+								)}
+								）中は一切料金が発生しません。期間終了後に月額150円（税込）の決済が開始されます。カード情報の変更や解約はStripeカスタマーポータルよりいつでも行えます。
+							</>
+						) : (
+							<>
+								プレミアム月額プランが有効です。すべての機能をご利用いただけます。次回の請求日や請求書履歴の確認、カード情報の変更はStripeカスタマーポータルより行えます。
+							</>
+						)}
+					</div>
+
+					{/* Stripe Customer Portal ボタン */}
+					<div className="pt-1">
+						<button
+							type="button"
+							onClick={handleOpenPortal}
+							disabled={isPortalLoading}
+							className="px-5 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							{isPortalLoading ? (
+								<>
+									<Loader2 className="w-4 h-4 animate-spin" />
+									<span>ポータルを開いています...</span>
+								</>
+							) : (
+								<>
+									<CreditCard className="w-4 h-4" />
+									<span>カード情報・請求情報を管理する</span>
+									<ExternalLink className="w-3.5 h-3.5 opacity-70 ml-1" />
+								</>
+							)}
+						</button>
+
+						{portalError && (
+							<p className="text-xs text-rose-400 font-semibold mt-3">
+								{portalError}
+							</p>
+						)}
+					</div>
 				</div>
 			)}
 
-			{/* 未加入（フリープラン）の場合 */}
-			{!isAdmin && !isSubscribed && (
+			{/* 未加入（期限切れ・フリープラン）の場合 */}
+			{!isAdmin && !hasSubscribed && !isUnsubscribedTrialing && (
 				<div className="p-4 rounded-xl bg-slate-900/40 border border-white/5 space-y-3">
 					<div className="flex items-center gap-2 text-xs text-slate-300">
 						<AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-						<span>現在有料プランには加入していません。</span>
+						<span>現在有効なプランはありません。</span>
 					</div>
 					<p className="text-xs text-slate-400">
-						90日間の無料トライアルに登録すると、すべての機能をご利用いただけます。
+						無料体験期間が終了しています。クレジットカードをご登録いただくと、すべての機能をご利用いただけます。
 					</p>
 					<div>
 						<Link
@@ -173,40 +240,9 @@ export function BillingSettingsSection({
 							className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-violet-600/20"
 						>
 							<Sparkles className="w-3.5 h-3.5" />
-							<span>90日間無料トライアルを始める</span>
+							<span>クレジットカードを登録する</span>
 						</Link>
 					</div>
-				</div>
-			)}
-
-			{/* Stripe Customer Portal ボタン */}
-			{!isAdmin && isSubscribed && (
-				<div className="pt-2">
-					<button
-						type="button"
-						onClick={handleOpenPortal}
-						disabled={isPortalLoading}
-						className="px-5 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						{isPortalLoading ? (
-							<>
-								<Loader2 className="w-4 h-4 animate-spin" />
-								<span>ポータルを開いています...</span>
-							</>
-						) : (
-							<>
-								<CreditCard className="w-4 h-4" />
-								<span>カード情報・請求情報を管理する</span>
-								<ExternalLink className="w-3.5 h-3.5 opacity-70 ml-1" />
-							</>
-						)}
-					</button>
-
-					{portalError && (
-						<p className="text-xs text-rose-400 font-semibold mt-3">
-							{portalError}
-						</p>
-					)}
 				</div>
 			)}
 		</div>

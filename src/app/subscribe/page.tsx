@@ -61,27 +61,30 @@ export default function SubscribePage() {
 					<div className="text-center space-y-2">
 						<div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-xs font-semibold text-violet-400">
 							<Sparkles className="h-3.5 w-3.5" />
-							初回90日間無料体験
+							プレミアムプラン登録
 						</div>
 						<h2 className="text-2xl font-bold text-white tracking-tight pt-2">
-							やりくり管理を始めましょう
+							クレジットカードのご登録
 						</h2>
 						<p className="text-slate-400 text-xs">
-							YariKuru のすべての機能をご利用いただくためのプランです。
+							これまでに登録された家計簿・予算・出費データは安全に保管されています。
 						</p>
 					</div>
 
 					{/* 料金詳細 */}
 					<div className="bg-[#030616]/50 border border-white/5 rounded-2xl p-5 text-center space-y-1">
 						<p className="text-slate-500 text-xs font-medium">
-							スタンダードプラン
+							プレミアム月額プラン
 						</p>
 						<p className="text-3xl font-black text-white">
 							¥150{" "}
-							<span className="text-sm font-normal text-slate-500">/ 月額</span>
+							<span className="text-sm font-normal text-slate-500">
+								/ 月額 (税込)
+							</span>
 						</p>
-						<p className="text-violet-400 text-xs font-semibold pt-1">
-							最初の90日間は ¥0 (いつでも解約可能)
+
+						<p className="text-emerald-400 text-xs font-semibold pt-1">
+							全機能が無制限・いつでも解約可能
 						</p>
 					</div>
 
@@ -91,7 +94,9 @@ export default function SubscribePage() {
 							<span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20">
 								<Check className="h-3.5 w-3.5" />
 							</span>
-							<span>初期の90日間は一切の請求が発生しません。</span>
+							<span>
+								保存されたこれまでの全データをそのまま引き継いで再開可能。
+							</span>
 						</li>
 						<li className="flex items-start gap-3">
 							<span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20">
@@ -111,7 +116,7 @@ export default function SubscribePage() {
 
 					{/* 決済ボタン */}
 					<div className="pt-2">
-						<SubscribeButton />
+						<SubscribeButton label="クレジットカードを登録して利用を再開" />
 					</div>
 
 					{/* 安心表記 */}

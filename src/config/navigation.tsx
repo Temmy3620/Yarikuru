@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 export interface NavItem {
 	name: string;
@@ -68,7 +68,7 @@ export const navItems: NavItem[] = [
 		),
 	},
 	{
-		name: "支出履歴",
+		name: "過去の支出履歴",
 		href: "/history",
 		icon: (
 			<svg

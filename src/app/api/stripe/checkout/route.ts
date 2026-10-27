@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
+import { calculateRemainingTrialDays } from "@/lib/subscription";
 import { getCurrentUser } from "@/lib/supabase/dal";
+import { createClient } from "@/lib/supabase/server";
+import { getBaseUrl } from "@/lib/url";
 
 export async function POST(req: Request) {
 	try {
@@ -16,10 +19,28 @@ export async function POST(req: Request) {
 		if (!process.env.STRIPE_PRICE_ID) {
 			console.error("STRIPE_PRICE_ID is not configured in env");
 			return NextResponse.json(
-				{ error: "Stripe Price ID が設定されていません。" },
+				{
+					error:
+						"Stripe Price ID が設定されていません。Vercel等の環境変数をご確認ください。",
+				},
 				{ status: 500 },
 			);
 		}
+
+		const supabase = await createClient();
+		const { data: dbUser } = await supabase
+			.from("users")
+			.select("trial_ends_at")
+			.eq("id", user.id)
+			.maybeSingle();
+
+		// 事前登録時に残り無料日数があればStripe側トライアル日数として引き継ぐ（期限切れ時は即時課金）
+		const remainingTrialDays = calculateRemainingTrialDays(
+			dbUser?.trial_ends_at,
+		);
+
+		// Vercel本番・ローカル両方で正しいURLを動的に生成
+		const baseUrl = await getBaseUrl(req);
 
 		// Stripe Checkout Sessionの作成
 		const session = await stripe.checkout.sessions.create({
@@ -32,11 +53,15 @@ export async function POST(req: Request) {
 					quantity: 1,
 				},
 			],
-			subscription_data: {
-				trial_period_days: 90, // 90日間無料トライアルを設定
-			},
-			success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-			cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscribe`, // 購読案内ページに戻す
+			...(remainingTrialDays > 0
+				? {
+						subscription_data: {
+							trial_period_days: remainingTrialDays,
+						},
+					}
+				: {}),
+			success_url: `${baseUrl}/dashboard?checkout_success=true&session_id={CHECKOUT_SESSION_ID}`,
+			cancel_url: `${baseUrl}/dashboard`,
 		});
 
 		if (!session.url) {

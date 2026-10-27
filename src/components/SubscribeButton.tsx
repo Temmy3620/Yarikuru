@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { Loader2, CreditCard } from "lucide-react";
 
-export function SubscribeButton() {
+interface SubscribeButtonProps {
+	label?: string;
+}
+
+export function SubscribeButton({
+	label = "クレジットカードを登録する",
+}: SubscribeButtonProps = {}) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -56,7 +62,7 @@ export function SubscribeButton() {
 				) : (
 					<>
 						<CreditCard className="h-5 w-5" />
-						90日間の無料体験を始める
+						{label}
 					</>
 				)}
 			</button>

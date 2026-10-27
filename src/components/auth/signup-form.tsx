@@ -2,6 +2,8 @@ import type { FormState } from "@/types/form";
 import type { SignupFormErrors } from "@/types/auth";
 import { PasswordInput } from "@/components/ui/password-input";
 import { motion } from "motion/react";
+import { Sparkles } from "lucide-react";
+import { getFreeTrialDays } from "@/lib/subscription";
 
 interface SignupFormProps {
 	action: (payload: FormData) => void;
@@ -68,6 +70,18 @@ export function SignupForm({ action, pending, state }: SignupFormProps) {
 			)}
 
 			<div className="space-y-5">
+				{/* 無料体験・クレカ不要の安心バナー */}
+				<motion.div
+					variants={itemVariants}
+					className="rounded-xl border border-indigo-500/20 bg-indigo-500/10 p-3 text-xs text-indigo-300 flex items-center gap-2.5"
+				>
+					<Sparkles className="w-4 h-4 text-indigo-400 shrink-0" />
+					<span>
+						<strong className="text-white">クレジットカード登録不要</strong>
+						で、登録後すぐに{getFreeTrialDays()}日間の無料体験を始められます
+					</span>
+				</motion.div>
+
 				{/* 名前入力 */}
 				<motion.div variants={itemVariants}>
 					<label

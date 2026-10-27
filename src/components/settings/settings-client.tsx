@@ -9,12 +9,14 @@ interface SettingsClientProps {
 	subscriptionStatus: string;
 	trialEndsAt: string | null;
 	isAdmin?: boolean;
+	stripeSubscriptionId?: string | null;
 }
 
 export default function SettingsClient({
 	subscriptionStatus,
 	trialEndsAt,
 	isAdmin = false,
+	stripeSubscriptionId = null,
 }: SettingsClientProps) {
 	return (
 		<main className="flex-1 p-4 md:p-8 max-w-4xl mx-auto w-full space-y-6">
@@ -36,6 +38,7 @@ export default function SettingsClient({
 				subscriptionStatus={subscriptionStatus}
 				trialEndsAt={trialEndsAt}
 				isAdmin={isAdmin}
+				stripeSubscriptionId={stripeSubscriptionId}
 			/>
 
 			{/* データの初期化セクション */}

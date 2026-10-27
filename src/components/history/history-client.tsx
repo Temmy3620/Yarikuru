@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { getYearlyHistoryAction } from "@/app/(authenticated)/history/actions";
 import type { MonthlyHistorySummary } from "@/components/history/types";
 import { ValueSelector } from "@/components/ui/value-selector";
-import { HistoryMonthCard } from "./history-month-card";
-import { getYearlyHistoryAction } from "@/app/(authenticated)/history/actions";
 import { HistoryCardSkeleton } from "./card-skeleton";
+import { HistoryMonthCard } from "./history-month-card";
 
 interface HistoryClientProps {
 	availableYears: number[];
@@ -60,7 +60,7 @@ export default function HistoryClient({
 			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-white/5 pb-6 gap-4">
 				<div>
 					<h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-						支出履歴
+						過去の支出履歴
 					</h1>
 					<p className="text-slate-400 mt-2 text-sm">
 						過去の月別予算と実際の支出を確認し、家計の振り返りを行います。

@@ -1,8 +1,8 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
-import type Stripe from "stripe";
 
 export async function POST(req: Request) {
 	const body = await req.text();
@@ -175,6 +175,7 @@ export async function POST(req: Request) {
 					.from("users")
 					.update({
 						subscription_status: status,
+						stripe_subscription_id: null,
 					})
 					.eq("id", user.id);
 
