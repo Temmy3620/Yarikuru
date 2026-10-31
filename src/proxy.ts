@@ -13,8 +13,9 @@ export const config = {
 		 * - _next/image (画像最適化ファイル)
 		 * - favicon.ico (ファビコンファイル)
 		 * - robots.txt, sitemap.xml (SEO・クローラー用ファイル)
-		 * - 画像やSVGなどのアセットファイル (拡張子)
+		 * - Google Search Console 所有権確認ファイル (google*.html)
+		 * - 画像やアセットファイル (拡張子)
 		 */
-		"/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+		"/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|html)$).*)",
 	],
 };
