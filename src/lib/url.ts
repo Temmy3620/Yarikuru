@@ -5,7 +5,7 @@ import { headers } from "next/headers";
  * アプリケーションのベースURLを取得する共通関数
  *
  * @param request 任意の Request オブジェクト（Route Handler などで使用）
- * @returns 例: "https://yarikuru.com" や "http://localhost:3005"
+ * @returns 例: "https://yarikuru.temmylabo.app" や "http://localhost:3005"
  */
 export async function getBaseUrl(request?: Request): Promise<string> {
 	// 環境変数が設定されている場合はそれを最優先で使用（http/https スキームの抜け漏れを自動補正）

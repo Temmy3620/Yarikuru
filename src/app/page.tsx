@@ -3,6 +3,12 @@ import { redirect } from "next/navigation";
 import LandingPageClient from "@/components/landing-page-client";
 import { createClient } from "@/lib/supabase/server";
 
+const defaultUrl = (
+	process.env.NEXT_PUBLIC_APP_URL || "https://yarikuru.temmylabo.app"
+)
+	.trim()
+	.replace(/\/$/, "");
+
 export const metadata: Metadata = {
 	title: "YariKuru（ヤリクル）| やりくり予算に特化したシンプルな予算管理アプリ",
 	description:
@@ -19,7 +25,7 @@ export const metadata: Metadata = {
 			"YariKuru（ヤリクル）| やりくり予算に特化したシンプルな予算管理アプリ",
 		description:
 			"固定費のノイズを排除し、「今月あといくら使えるか」に特化。過去のやりくり設定も正確に振り返れます。",
-		url: "https://yarikuru.com",
+		url: defaultUrl,
 		siteName: "YariKuru",
 		locale: "ja_JP",
 		type: "website",
@@ -31,7 +37,7 @@ const jsonLd = {
 	"@type": "WebApplication",
 	name: "YariKuru（ヤリクル）",
 	alternateName: "YariKuru",
-	url: "https://yarikuru.com",
+	url: defaultUrl,
 	description:
 		"固定費を除外した「自分でコントロールできるやりくり予算」だけに集中できる予算管理アプリ。直感的な円グラフと過去のスナップショット機能で、日々のやりくりをスマートにサポートします。",
 	applicationCategory: "FinanceApplication",
