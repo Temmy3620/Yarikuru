@@ -61,7 +61,9 @@ export async function updateSession(request: NextRequest) {
 		request.nextUrl.pathname.startsWith("/legal") ||
 		request.nextUrl.pathname.startsWith("/contact") ||
 		request.nextUrl.pathname === "/robots.txt" ||
-		request.nextUrl.pathname === "/sitemap.xml";
+		request.nextUrl.pathname === "/sitemap.xml" ||
+		(request.nextUrl.pathname.startsWith("/google") &&
+			request.nextUrl.pathname.endsWith(".html"));
 
 	// 未ログイン時にログイン画面、ルート(LP)、パスワード忘れた/リセット画面、認証関連、公開情報ページ以外のページにアクセスした場合
 	if (
