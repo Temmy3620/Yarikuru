@@ -13,8 +13,14 @@ const geistMono = Geist_Mono({
 	subsets: ["latin"],
 });
 
+const defaultUrl = (
+	process.env.NEXT_PUBLIC_APP_URL || "https://yarikuru.temmylabo.app"
+)
+	.trim()
+	.replace(/\/$/, "");
+
 export const metadata: Metadata = {
-	metadataBase: new URL("https://yarikuru.com"),
+	metadataBase: new URL(defaultUrl),
 	title: "YariKuru（ヤリクル）",
 	description: "予算の管理と可視化を行う Next.js アプリケーション",
 	icons: {

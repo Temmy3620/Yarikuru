@@ -1,7 +1,11 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-	const baseUrl = "https://yarikuru.com";
+	const baseUrl = (
+		process.env.NEXT_PUBLIC_APP_URL || "https://yarikuru.temmylabo.app"
+	)
+		.trim()
+		.replace(/\/$/, "");
 
 	return [
 		{
